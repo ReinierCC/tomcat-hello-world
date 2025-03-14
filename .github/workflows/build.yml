@@ -12,18 +12,15 @@ jobs:
     
     - name: Generate AI-friendly repository structure
       run: |
-        # Install tree command
-        sudo apt-get install -y tree
-        
-        # Check tree version
-        tree --version
+        # Install tree command and jq
+        sudo apt-get install -y tree jq
         
         # Create a traditional tree view for human reading
         echo "Repository structure:" > repo-structure.txt
         tree -a -I '.git' >> repo-structure.txt
         
-        # Generate JSON structure using tree's built-in JSON option (-J)
-        tree -a -I '.git' -J > repo-structure.json
+        # Generate clean hierarchical JSON structure
+        tree -a -I '.git' -J | jq '[.[0] | {name: "repository", contents: [recurse(.contents[]? | {name: .name, type: .type, contents: .contents})] | sort_by(.name)}][0]' > repo-structure.json
         
         # Display the structure
         cat repo-structure.txt
