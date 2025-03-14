@@ -224,7 +224,7 @@ func buildDockerfile(dockerfilePath string) (bool, string) {
 
 	// Run Docker build with explicit context path
 	// Use the absolute path for the dockerfile and specify the context directory
-	cmd := exec.Command("docker", "build", "-f", dockerfilePath, "-t", "test-image:latest", dockerfileDir)
+	cmd := exec.Command("docker", "build", "-f", dockerfilePath, "-t", "tomcat-hello-world/workflow:latest", dockerfileDir)
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)
 
