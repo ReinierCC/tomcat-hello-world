@@ -19,13 +19,13 @@ jobs:
         echo "Repository structure:" > repo-structure.txt
         tree -a -I '.git' >> repo-structure.txt
         
-        # Generate ultra-minimal nested structure with no name fields
+        # Generate ultra-minimal nested structure with no duplicated values
         tree -a -I '.git' -J | jq '
           def process:
             if .type == "directory" and .name then
               {(.name): (.contents | map(process) | reduce .[] as $item ({}; . + $item))}
             elif .name then
-              {(.name): .name}
+              {(.name): null}
             else
               {}
             end;
