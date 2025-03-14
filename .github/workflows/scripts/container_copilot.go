@@ -307,18 +307,27 @@ func deployAndVerifySingleManifest(manifestPath string) (bool, string) {
 		return false, outputStr
 	}
 
-	fmt.Printf("Successfully applied %s, checking pod health...\n", manifestPath)
+	fmt.Printf("Successfully applied %s\n", manifestPath)
 
-	// Extract namespace and app labels from the manifest
-	// This is simplified - would need to actually take this from the manifest
-	namespace := "default"        // Default namespace
-	labelSelector := "app=my-app" // Default label selector
+	// Only check pod status for deployment.yaml files
+	baseFilename := filepath.Base(manifestPath)
+	if baseFilename == "deployment.yaml" {
+		fmt.Printf("Checking pod health for deployment...\n")
 
-	// Wait for pods to become healthy
-	podSuccess, podOutput := checkPodStatus(namespace, labelSelector, 2*time.Minute)
-	if !podSuccess {
-		fmt.Printf("Pods are not healthy: %s\n", podOutput)
-		return false, outputStr + "\n" + podOutput
+		// Extract namespace and app labels from the manifest
+		// This is simplified - would need to actually take this from the manifest
+		namespace := "default"        // Default namespace
+		labelSelector := "app=my-app" // Default label selector
+
+		// Wait for pods to become healthy
+		podSuccess, podOutput := checkPodStatus(namespace, labelSelector, time.Minute)
+		if !podSuccess {
+			fmt.Printf("Pods are not healthy: %s\n", podOutput)
+			return false, outputStr + "\n" + podOutput
+		}
+		fmt.Println("Pod health check passed")
+	} else {
+		fmt.Printf("Skipping pod health check for non-deployment manifest: %s\n", baseFilename)
 	}
 
 	return true, outputStr
