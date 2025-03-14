@@ -243,6 +243,8 @@ func checkPodStatus(namespace string, labelSelector string, timeout time.Duratio
 	for time.Now().Before(endTime) {
 		cmd := exec.Command("kubectl", "get", "pods", "-n", namespace, "-l", labelSelector, "-o", "json")
 		output, err := cmd.CombinedOutput()
+
+		fmt.Println("Kubectl get pods output:", string(output))
 		if err != nil {
 			return false, fmt.Sprintf("Error checking pod status: %v\nOutput: %s", err, string(output))
 		}
