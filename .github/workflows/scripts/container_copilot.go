@@ -662,7 +662,7 @@ func main() {
 
 	// If no arguments provided, print usage
 	fmt.Println("Usage:")
-	fmt.Println("  go run azure_openai_hello.go                          - Test Azure OpenAI connection")
-	fmt.Println("  go run azure_openai_hello.go iterate-dockerfile-build [dockerfile-path] [file-structure-path] [max-iterations] - Iteratively build and fix a Dockerfile")
-	fmt.Println("  go run azure_openai_hello.go iterate-kubernetes-deploy [manifest-path-or-dir] [file-structure-path] [max-iterations] - Iteratively deploy and fix Kubernetes manifest(s)")
+	fmt.Println("  go run container_copilot.go                          - Test Azure OpenAI connection")
+	fmt.Println("  go run container_copilot.go iterate-dockerfile-build [dockerfile-path] [file-structure-path] [max-iterations] - Iteratively build and fix a Dockerfile")
+	fmt.Println("  go run container_copilot.go iterate-kubernetes-deploy [manifest-path-or-dir] [file-structure-path] [max-iterations] - Iteratively deploy and fix Kubernetes manifest(s)")
 }

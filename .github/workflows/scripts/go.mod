@@ -1,4 +1,4 @@
-module azure-openai-test
+module container-copilot
 
 go 1.23.1
 
