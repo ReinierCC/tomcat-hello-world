@@ -219,7 +219,12 @@ func checkDockerInstalled() error {
 
 // buildDockerfile attempts to build the Docker image and returns any error output
 func buildDockerfile(dockerfilePath string) (bool, string) {
-	cmd := exec.Command("docker", "build", "-f", dockerfilePath, "-t", "test-image:latest", ".")
+	// Get the directory containing the Dockerfile to use as build context
+	dockerfileDir := filepath.Dir(dockerfilePath)
+
+	// Run Docker build with explicit context path
+	// Use the absolute path for the dockerfile and specify the context directory
+	cmd := exec.Command("docker", "build", "-f", dockerfilePath, "-t", "test-image:latest", dockerfileDir)
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)
 
