@@ -14,24 +14,6 @@ jobs:
           repository: davidgamero/draft
           ref: tomcat-template
           path: draft
-      - name: Build Draft
-        run: |
-          cd draft
-          go build -o ../.github/workflows/bin/draft
-          chmod +x ../.github/workflows/bin/draft
-          cd ..
-          rm -rf draft
-      - name: Generate with Draft
-        run: |
-          .github/workflows/bin/draft create -vv --interactive=false --skip-file-detection
-      
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       - name: Create k8s Kind Cluster
         id: kind
@@ -41,6 +23,25 @@ jobs:
           registry_name: my-registry
           registry_port: 5001
           registry_enable_delete: true
+
+      - name: Build Draft
+        run: |
+          cd draft
+          go build -o ../.github/workflows/bin/draft
+          chmod +x ../.github/workflows/bin/draft
+          cd ..
+          rm -rf draft
+      - name: Generate with Draft
+        run: |
+          .github/workflows/bin/draft create -vv --interactive=false --skip-file-detection --variable IMAGENAME=${{ steps.kind.outputs.LOCAL_REGISTRY }}/tomcat-hello-world-workflow 
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
             
       - name: Run Azure OpenAI scripts
         run: |

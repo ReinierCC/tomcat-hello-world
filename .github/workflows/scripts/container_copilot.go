@@ -368,6 +368,19 @@ func iterateDockerfileBuild(client *azopenai.Client, deploymentID string, docker
 		if success {
 			fmt.Println("🎉 Docker build succeeded!")
 			fmt.Println("Successful Dockerfile: \n", currentDockerfile)
+
+			//Temp code for pushing to kind registry
+			registryName := os.Getenv("REGISTRY")
+			cmd := exec.Command("docker", "push", registryName+"/tomcat-hello-world-workflow:latest")
+			output, err := cmd.CombinedOutput()
+			outputStr := string(output)
+			fmt.Println("Output: ", outputStr)
+
+			if err != nil {
+				fmt.Println("Registry push failed with error:", err)
+				return fmt.Errorf("error pushing to registry: %v", err)
+			}
+
 			return nil
 		}
 
