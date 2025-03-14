@@ -262,19 +262,49 @@ func checkPodStatus(namespace string, labelSelector string, timeout time.Duratio
 	return false, "Timeout waiting for pods to become ready"
 }
 
-// deployKubernetesManifest attempts to deploy the Kubernetes manifest and returns any error output
-func deployKubernetesManifest(manifestPath string) (bool, string) {
-	// Kubectl executable check moved to iterateKubernetesManifestDeploy
+// deployKubernetesManifests attempts to deploy multiple Kubernetes manifests and track results for each
+func deployKubernetesManifests(manifestPaths []string) (bool, []ManifestDeployResult) {
+	results := make([]ManifestDeployResult, len(manifestPaths))
+	overallSuccess := true
+
+	// Deploy each manifest individually to track errors per manifest
+	for i, path := range manifestPaths {
+		fmt.Printf("Deploying manifest: %s\n", path)
+		success, outputStr := deployAndVerifySingleManifest(path)
+
+		// Record the result
+		results[i] = ManifestDeployResult{
+			Path:    path,
+			Success: success,
+			Output:  outputStr,
+		}
+
+		if !success {
+			overallSuccess = false
+			fmt.Printf("Deployment failed for %s\n", path)
+		} else {
+			fmt.Printf("Successfully deployed %s\n", path)
+		}
+	}
+
+	return overallSuccess, results
+}
+
+// deployAndVerifySingleManifest applies a single manifest and verifies pod health
+func deployAndVerifySingleManifest(manifestPath string) (bool, string) {
+	// Apply the manifest
 	cmd := exec.Command("kubectl", "apply", "-f", manifestPath)
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)
 
 	if err != nil {
-		fmt.Println("Kubernetes deployment failed with error:", err)
+		fmt.Printf("Kubernetes deployment failed for %s with error: %v\n", manifestPath, err)
 		return false, outputStr
 	}
 
-	// Extract namespace and app labels from the manifest to check pods
+	fmt.Printf("Successfully applied %s, checking pod health...\n", manifestPath)
+
+	// Extract namespace and app labels from the manifest
 	// This is simplified - would need to actually take this from the manifest
 	namespace := "default"        // Default namespace
 	labelSelector := "app=my-app" // Default label selector
@@ -282,42 +312,11 @@ func deployKubernetesManifest(manifestPath string) (bool, string) {
 	// Wait for pods to become healthy
 	podSuccess, podOutput := checkPodStatus(namespace, labelSelector, 2*time.Minute)
 	if !podSuccess {
-		fmt.Println("Deployment was applied but pods are not healthy:", podOutput)
+		fmt.Printf("Pods are not healthy: %s\n", podOutput)
 		return false, outputStr + "\n" + podOutput
 	}
 
 	return true, outputStr
-}
-
-// deployKubernetesManifests attempts to deploy multiple Kubernetes manifests and track results for each
-func deployKubernetesManifests(manifestPaths []string) (bool, []ManifestDeployResult) {
-	// Kubectl executable check moved to iterateMultipleManifestsDeploy
-	results := make([]ManifestDeployResult, len(manifestPaths))
-	overallSuccess := true
-
-	// Deploy each manifest individually to track errors per manifest
-	for i, path := range manifestPaths {
-		fmt.Printf("Deploying manifest: %s\n", path)
-		cmd := exec.Command("kubectl", "apply", "-f", path)
-		output, err := cmd.CombinedOutput()
-		outputStr := string(output)
-
-		// Record the result
-		results[i] = ManifestDeployResult{
-			Path:    path,
-			Success: err == nil,
-			Output:  outputStr,
-		}
-
-		if err != nil {
-			fmt.Printf("Kubernetes deployment failed for %s with error: %v\n", path, err)
-			overallSuccess = false
-		} else {
-			fmt.Printf("Successfully applied %s\n", path)
-		}
-	}
-
-	return overallSuccess, results
 }
 
 // iterateDockerfileBuild attempts to iteratively fix and build the Dockerfile
@@ -630,7 +629,7 @@ func main() {
 			}
 
 			if err := iterateMultipleManifestsDeploy(client, deploymentID, manifestPath, fileStructurePath, maxIterations); err != nil {
-				fmt.Printf("Error in Kubernetes deployment process: %v\n", err)
+				fmt.Printf("Error in Kubernetes deployment process: %v", err)
 				os.Exit(1)
 			}
 
