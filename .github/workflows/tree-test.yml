@@ -1,0 +1,43 @@
+name: File Tree Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Generate AI-friendly repository structure
+      run: |
+        # Install tree command and jq
+        sudo apt-get install -y tree jq
+        
+        # Create a traditional tree view for human reading
+        echo "Repository structure:" > repo-structure.txt
+        tree -a -I '.git' >> repo-structure.txt
+        
+        # Generate ultra-minimal nested structure with no name fields
+        tree -a -I '.git' -J | jq '
+          def process: 
+            if .type == "directory" then
+              {(.name): [.contents[]? | process] | from_entries}
+            else
+              .name
+            end;
+          {repository: [.[0].contents[] | process] | from_entries}
+        ' > repo-structure.json
+        
+        # Display the structure
+        cat repo-structure.txt
+        echo "JSON structure available at: repo-structure.json"
+        
+    - name: Upload repository structure
+      uses: actions/upload-artifact@v4
+      with:
+        name: repo-structure
+        path: |
+          repo-structure.json
+          repo-structure.txt
