@@ -21,13 +21,13 @@ jobs:
         
         # Generate ultra-minimal nested structure with no name fields
         tree -a -I '.git' -J | jq '
-          def process: 
+          def process:
             if .type == "directory" then
-              {(.name): [.contents[]? | process] | from_entries}
+              {(.name): (.contents | map(process) | from_entries)}
             else
-              .name
+              {(.name): null}
             end;
-          {repository: [.[0].contents[] | process] | from_entries}
+          .[0].contents | map(process) | from_entries
         ' > repo-structure.json
         
         # Display the structure
