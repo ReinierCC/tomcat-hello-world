@@ -615,7 +615,7 @@ func main() {
 
 		case "iterate-kubernetes-deploy":
 			maxIterations := 5
-			manifestPath := "../../../kubernetes" // Default directory containing manifests
+			manifestPath := "../../../manifests" // Default directory containing manifests
 			fileStructurePath := "repo_structure_json.txt"
 
 			// Allow custom manifest path (can be a directory or file)
