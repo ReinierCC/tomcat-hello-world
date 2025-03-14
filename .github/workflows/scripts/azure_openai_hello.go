@@ -350,6 +350,7 @@ func iterateDockerfileBuild(client *azopenai.Client, deploymentID string, docker
 		success, buildOutput := buildDockerfile(dockerfilePath)
 		if success {
 			fmt.Println("🎉 Docker build succeeded!")
+			fmt.Println("Successful Dockerfile: \n", currentDockerfile)
 			return nil
 		}
 
