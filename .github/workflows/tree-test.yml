@@ -25,7 +25,7 @@ jobs:
             if .type == "directory" and .name then
               {(.name): (.contents | map(process) | reduce .[] as $item ({}; . + $item))}
             elif .name then
-              {(.name): null}
+              {(.name): ""}
             else
               {}
             end;
