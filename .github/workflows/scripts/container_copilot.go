@@ -222,9 +222,11 @@ func buildDockerfile(dockerfilePath string) (bool, string) {
 	// Get the directory containing the Dockerfile to use as build context
 	dockerfileDir := filepath.Dir(dockerfilePath)
 
+	registryName := os.Getenv("REGISTRY")
+
 	// Run Docker build with explicit context path
 	// Use the absolute path for the dockerfile and specify the context directory
-	cmd := exec.Command("docker", "build", "-f", dockerfilePath, "-t", "tomcat-hello-world-workflow:latest", dockerfileDir)
+	cmd := exec.Command("docker", "build", "-f", dockerfilePath, "-t", registryName+"/tomcat-hello-world-workflow:latest", dockerfileDir)
 	output, err := cmd.CombinedOutput()
 	outputStr := string(output)
 
