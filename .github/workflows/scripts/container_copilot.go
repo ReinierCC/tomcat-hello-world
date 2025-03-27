@@ -596,7 +596,7 @@ func main() {
 	// Get environment variables
 	apiKey := os.Getenv("AZURE_OPENAI_KEY")
 	endpoint := os.Getenv("AZURE_OPENAI_ENDPOINT")
-	deploymentID := "o3-mini-2"
+	deploymentID := "o3-mini"
 
 	if apiKey == "" || endpoint == "" {
 		fmt.Println("Error: AZURE_OPENAI_KEY and AZURE_OPENAI_ENDPOINT environment variables must be set")
